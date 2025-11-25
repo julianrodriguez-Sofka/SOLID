@@ -12,9 +12,12 @@ Este directorio usa la analogía del chef para explicar tres situaciones comunes
 
 Cada escenario está empaquetado en un script independiente que incluye todo el código necesario para ilustrar ese caso particular:
 
-- `python Escenario/isp/correct_scenario.py`
-- `python Escenario/isp/bad_scenario.py`
-- `python Escenario/isp/missing_scenario.py`
+Comandos de Ejecucion en la terminal:
+
+python Escenario/isp/correct_scenario.py
+python Escenario/isp/bad_scenario.py
+python Escenario/isp/missing_scenario.py
+python Escenario/isp/isp_showcase.py
 
 Estos comandos muestran únicamente el escenario elegido y su salida. Si quieres revivir la secuencia completa original, ejecuta:
 
