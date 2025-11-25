@@ -15,8 +15,11 @@ Cada escenario está empaquetado en un script independiente que incluye todo el 
 Comandos de Ejecucion en la terminal:
 
 python Escenario/isp/correct_scenario.py
+
 python Escenario/isp/bad_scenario.py
+
 python Escenario/isp/missing_scenario.py
+
 python Escenario/isp/isp_showcase.py
 
 Estos comandos muestran únicamente el escenario elegido y su salida. Si quieres revivir la secuencia completa original, ejecuta:
