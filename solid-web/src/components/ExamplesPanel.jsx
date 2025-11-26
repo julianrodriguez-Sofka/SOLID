@@ -107,6 +107,96 @@ class PastryChefWithMasterContract(MasterChefContract):
   },
 ]
 
+const dipScenarios = [
+  {
+    id: 'dip-good',
+    label: 'Patrón',
+    title: 'DIP aplicado correctamente',
+    subtitle: 'OrderManager depende de la abstracción ChefContract',
+    description:
+      'La clase de alto nivel no conoce los detalles del repostero; todo pasa por el contrato `ChefContract` y la dependencia se inyecta desde afuera.',
+    highlights: [
+      'OrderManager recibe la dependencia en el constructor y solo llama a `prepare_dish`.',
+      '`PastryChef` implementa `ChefContract` sin exponer lógica adicional a OrderManager.',
+      'Puedes intercambiar chefs sin tocar la clase de alto nivel ni violar DIP.',
+    ],
+    script: 'Escenario/dip/good_scenario.py',
+    commands: ['python Escenario/dip/good_scenario.py'],
+    snippet: `class ChefContract:
+    def prepare_dish(self):
+        raise NotImplementedError
+
+
+class PastryChef(ChefContract):
+    def prepare_dish(self):
+        print("  PastryChef: Preparando el postre solicitado.")
+
+
+class OrderManager:
+    def __init__(self, chef: ChefContract):
+        self._chef = chef
+
+    def process_order(self):
+        print("OrderManager: Recibí una orden, delego al cocinero.")
+        self._chef.prepare_dish()
+`,
+  },
+  {
+    id: 'dip-bad',
+    label: 'Anti-Patrón',
+    title: 'Dependencia rígida',
+    subtitle: 'OrderManager crea internamente al chef',
+    description:
+      'La clase de alto nivel construye directamente el repostero y conoce los detalles concretos, lo que impide pruebas aisladas y extensiones.',
+    highlights: [
+      'OrderManager no recibe ninguna abstracción; la crea internamente.',
+      'La clase queda atada a `PastryChef` y no hay punto para inyectar otro comportamiento.',
+      'Violación del DIP y del OCP porque cambiar el chef obliga a editar el alto nivel.',
+    ],
+    script: 'Escenario/dip/bad_scenario.py',
+    commands: ['python Escenario/dip/bad_scenario.py'],
+    snippet: `class PastryChef:
+    def prepare_dish(self):
+        print("  PastryChef: Preparando un postre desde dentro de OrderManager.")
+
+
+class OrderManager:
+    def process_order(self):
+        print("OrderManager: Recibí una orden y creo yo al chef (dependencia rígida).")
+        chef = PastryChef()
+        chef.prepare_dish()
+`,
+  },
+  {
+    id: 'dip-missing',
+    label: 'Sin abstracción',
+    title: 'Inyección sin interfaz',
+    subtitle: 'OrderManager depende de la clase concreta',
+    description:
+      'La dependencia se inyecta, pero ambas capas siguen dependiendo de `PastryChef`, por lo que no se puede cambiar la implementación sin modificar la clase de alto nivel.',
+    highlights: [
+      'OrderManager recibe el chef desde afuera, pero conoce la clase concreta.',
+      'No hay contrato compartido, así que la inversión de dependencias nunca se completa.',
+      'Se mantiene acoplamiento y falta la capacidad de sustituir implementaciones.',
+    ],
+    script: 'Escenario/dip/missing_scenario.py',
+    commands: ['python Escenario/dip/missing_scenario.py'],
+    snippet: `class PastryChef:
+    def prepare_dish(self):
+        print("  PastryChef: Haciendo un postre personalizado.")
+
+
+class OrderManager:
+    def __init__(self, chef: PastryChef):
+        self._chef = chef
+
+    def process_order(self):
+        print("OrderManager: La dependencia viene desde afuera, pero sigo acoplado a PastryChef.")
+        self._chef.prepare_dish()
+`,
+  },
+]
+
 const srpScenarios = [
   {
     id: 'srp-pattern',
@@ -236,6 +326,7 @@ def turno_completo():
 const ExamplesPanel = ({ principle }) => {
   const [activeScenarioIndex, setActiveScenarioIndex] = useState(0)
   const [activeSrpScenarioIndex, setActiveSrpScenarioIndex] = useState(0)
+  const [activeDipScenarioIndex, setActiveDipScenarioIndex] = useState(0)
 
   useEffect(() => {
     if (!principle) return
@@ -244,6 +335,8 @@ const ExamplesPanel = ({ principle }) => {
       setActiveScenarioIndex(0)
     } else if (principle.short === 'SRP') {
       setActiveSrpScenarioIndex(0)
+    } else if (principle.short === 'DIP') {
+      setActiveDipScenarioIndex(0)
     }
   }, [principle])
   if (!principle) return null
@@ -273,6 +366,88 @@ const ExamplesPanel = ({ principle }) => {
                   className={`px-3 py-2 text-sm font-semibold rounded-full border transition ${
                     idx === activeScenarioIndex
                       ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                      : 'border-slate-200 bg-slate-100 text-slate-600'
+                  }`}
+                >
+                  {scenario.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="border border-slate-300 rounded-lg bg-slate-900 p-4 min-h-64">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex space-x-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full" />
+                <div className="w-3 h-3 bg-yellow-500 rounded-full" />
+                <div className="w-3 h-3 bg-green-500 rounded-full" />
+              </div>
+              <span className="text-slate-400 text-sm">example.py</span>
+            </div>
+            <div className="text-slate-300 text-sm font-mono leading-relaxed whitespace-pre-wrap">
+              {activeScenario.snippet}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm font-semibold text-gray-900">{activeScenario.title}</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500">{activeScenario.subtitle}</p>
+            </div>
+            <p className="text-gray-700">{activeScenario.description}</p>
+            <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+              {activeScenario.highlights.map((highlight) => (
+                <li key={highlight}>{highlight}</li>
+              ))}
+            </ul>
+
+            <div className="pt-4 border-t border-slate-200">
+              <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">Script</div>
+              <div className="bg-slate-900 text-xs text-emerald-300 font-mono px-3 py-1 rounded">
+                {activeScenario.script}
+              </div>
+              <div className="text-xs uppercase tracking-wide text-slate-500 mt-3 mb-1">
+                Cómo ejecutarlo
+              </div>
+              <div className="bg-slate-800 px-3 py-2 rounded space-y-1">
+                {activeScenario.commands.map((command) => (
+                  <div key={command} className="text-emerald-300 font-mono text-xs">
+                    {command}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (principle.short === 'DIP') {
+    const activeScenario = dipScenarios[activeDipScenarioIndex]
+
+    return (
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="px-6 py-4 bg-gradient-to-r from-amber-600 to-orange-600">
+          <h2 className="text-xl font-semibold text-white flex items-center space-x-2">
+            <Code className="h-5 w-5" />
+            <span>Ejemplos de Implementación</span>
+          </h2>
+        </div>
+
+        <div className="p-6 space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Repertorio DIP</h3>
+            <p className="text-gray-600 mb-3">Explora los scripts del directorio <code>Escenario/dip</code>.</p>
+            <div className="flex flex-wrap gap-2">
+              {dipScenarios.map((scenario, idx) => (
+                <button
+                  key={scenario.id}
+                  type="button"
+                  onClick={() => setActiveDipScenarioIndex(idx)}
+                  className={`px-3 py-2 text-sm font-semibold rounded-full border transition ${
+                    idx === activeDipScenarioIndex
+                      ? 'border-amber-600 bg-amber-50 text-amber-700'
                       : 'border-slate-200 bg-slate-100 text-slate-600'
                   }`}
                 >
