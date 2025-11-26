@@ -420,11 +420,106 @@ def turno_completo():
   },
 ]
 
+const lspScenarios = [
+  {
+    id: 'lsp-good',
+    label: 'Patrón',
+    title: 'LSP respetado',
+    subtitle: 'ChefEspecialista extiende sin romper la promesa',
+    description:
+      'El chef especializado sigue devolviendo un string y el cliente puede tratarlo como tal; el subtipo cumple con la interfaz del padre.',
+    highlights: [
+      'El contrato `Chef.preparar_plato` sigue prometiendo un string.',
+      'ChefEspecialista agrega detalles pero mantiene el tipo devuelto.',
+      'Servir_plato funciona con cualquier subtipo que mantenga esa promesa.',
+    ],
+    script: 'Liskov Substitution Principle/Ejemplo_PatronCorrecto/liskov_correcto.py',
+    commands: ['python "Liskov Substitution Principle/Ejemplo_PatronCorrecto/liskov_correcto.py"'],
+    snippet: `class Chef:
+    def preparar_plato(self):
+        return "Plato caliente"
+
+
+class ChefEspecialista(Chef):
+    def preparar_plato(self):
+        plato_base = super().preparar_plato()
+        return plato_base + " con especias especiales"
+
+
+def servir_plato(chef: Chef):
+    plato = chef.preparar_plato()
+    print("Sirviendo:", plato.upper())
+`,
+  },
+  {
+    id: 'lsp-anti',
+    label: 'Anti-Patrón',
+    title: 'Rompe la promesa',
+    subtitle: 'ChefVegetariano devuelve `None`',
+    description:
+      'La subclase rompe la expectativa: el padre promete un string, el hijo entrega `None`, y el cliente se derrumba al llamar a `.upper()`.',
+    highlights: [
+      'El método del subtipo no respeta el tipo retornado.',
+      'Los tipos derivados deben ser intercambiables sin errores.',
+      'Aquí el código se cae en tiempo de ejecución (violación directa de LSP).',
+    ],
+    script: 'Liskov Substitution Principle/Ejemplo_AntiPatron/liskov_malo.py',
+    commands: ['python "Liskov Substitution Principle/Ejemplo_AntiPatron/liskov_malo.py"'],
+    snippet: `class Chef:
+    def preparar_plato(self):
+        return "Plato caliente listo"
+
+
+class ChefVegetariano(Chef):
+    def preparar_plato(self):
+        return None
+
+
+def servir_plato(chef: Chef):
+    plato = chef.preparar_plato()
+    print("Sirviendo:", plato.upper())
+`,
+  },
+  {
+    id: 'lsp-sin',
+    label: 'Sin Patrón',
+    title: 'Cambia la estructura',
+    subtitle: 'ChefGourmet devuelve dict',
+    description:
+      'El subtipo retorna un diccionario en lugar de un string, rompiendo las expectativas del código cliente que ya asume un string.',
+    highlights: [
+      'Los clientes asumen un tipo concreto y fallan al recibir otra cosa.',
+      'La sustitución solo funciona si el subtipo mantiene el contrato original.',
+      'La clase pasa a ser incompatible con quien depende de la clase base.',
+    ],
+    script: 'Liskov Substitution Principle/Ejemplo_SinPatron/liskov_sin_aplicar.py',
+    commands: ['python "Liskov Substitution Principle/Ejemplo_SinPatron/liskov_sin_aplicar.py"'],
+    snippet: `class Chef:
+    def preparar_plato(self):
+        return "Plato caliente"
+
+
+class ChefGourmet(Chef):
+    def preparar_plato(self):
+        return {
+            "plato": "Plato caliente",
+            "decoracion": "Flores comestibles"
+        }
+
+
+def servir_plato(chef: Chef):
+    plato = chef.preparar_plato()
+    print("LONGITUD DEL PLATO:", len(plato))
+`,
+  },
+]
+
 const ExamplesPanel = ({ principle }) => {
   const [activeScenarioIndex, setActiveScenarioIndex] = useState(0)
   const [activeSrpScenarioIndex, setActiveSrpScenarioIndex] = useState(0)
   const [activeDipScenarioIndex, setActiveDipScenarioIndex] = useState(0)
   const [activeOcpScenarioIndex, setActiveOcpScenarioIndex] = useState(0)
+  const [activeLspScenarioIndex, setActiveLspScenarioIndex] = useState(0)
 
   useEffect(() => {
     if (!principle) return
@@ -437,6 +532,8 @@ const ExamplesPanel = ({ principle }) => {
       setActiveOcpScenarioIndex(0)
     } else if (principle.short === 'DIP') {
       setActiveDipScenarioIndex(0)
+    } else if (principle.short === 'LSP') {
+      setActiveLspScenarioIndex(0)
     }
   }, [principle])
   if (!principle) return null
@@ -630,6 +727,88 @@ const ExamplesPanel = ({ principle }) => {
                   className={`px-3 py-2 text-sm font-semibold rounded-full border transition ${
                     idx === activeOcpScenarioIndex
                       ? 'border-fuchsia-600 bg-fuchsia-50 text-fuchsia-700'
+                      : 'border-slate-200 bg-slate-100 text-slate-600'
+                  }`}
+                >
+                  {scenario.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="border border-slate-300 rounded-lg bg-slate-900 p-4 min-h-64">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex space-x-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full" />
+                <div className="w-3 h-3 bg-yellow-500 rounded-full" />
+                <div className="w-3 h-3 bg-green-500 rounded-full" />
+              </div>
+              <span className="text-slate-400 text-sm">example.py</span>
+            </div>
+            <div className="text-slate-300 text-sm font-mono leading-relaxed whitespace-pre-wrap">
+              {activeScenario.snippet}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm font-semibold text-gray-900">{activeScenario.title}</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500">{activeScenario.subtitle}</p>
+            </div>
+            <p className="text-gray-700">{activeScenario.description}</p>
+            <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+              {activeScenario.highlights.map((highlight) => (
+                <li key={highlight}>{highlight}</li>
+              ))}
+            </ul>
+
+            <div className="pt-4 border-t border-slate-200">
+              <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">Script</div>
+              <div className="bg-slate-900 text-xs text-emerald-300 font-mono px-3 py-1 rounded">
+                {activeScenario.script}
+              </div>
+              <div className="text-xs uppercase tracking-wide text-slate-500 mt-3 mb-1">
+                Cómo ejecutarlo
+              </div>
+              <div className="bg-slate-800 px-3 py-2 rounded space-y-1">
+                {activeScenario.commands.map((command) => (
+                  <div key={command} className="text-emerald-300 font-mono text-xs">
+                    {command}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (principle.short === 'LSP') {
+    const activeScenario = lspScenarios[activeLspScenarioIndex]
+
+    return (
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="px-6 py-4 bg-gradient-to-r from-teal-600 to-blue-600">
+          <h2 className="text-xl font-semibold text-white flex items-center space-x-2">
+            <Code className="h-5 w-5" />
+            <span>Ejemplos de Implementación</span>
+          </h2>
+        </div>
+
+        <div className="p-6 space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Colección LSP</h3>
+            <p className="text-gray-600 mb-3">Revisa los scripts del directorio <code>Liskov Substitution Principle</code>.</p>
+            <div className="flex flex-wrap gap-2">
+              {lspScenarios.map((scenario, idx) => (
+                <button
+                  key={scenario.id}
+                  type="button"
+                  onClick={() => setActiveLspScenarioIndex(idx)}
+                  className={`px-3 py-2 text-sm font-semibold rounded-full border transition ${
+                    idx === activeLspScenarioIndex
+                      ? 'border-blue-600 bg-blue-50 text-blue-700'
                       : 'border-slate-200 bg-slate-100 text-slate-600'
                   }`}
                 >
