@@ -197,6 +197,103 @@ class OrderManager:
   },
 ]
 
+const ocpScenarios = [
+  {
+    id: 'ocp-pattern',
+    label: 'Patrón',
+    title: 'OCP bien aplicado',
+    subtitle: 'ChefRepostero abierto a nuevas recetas',
+    description:
+      'Se define un contrato abstracto `PreparacionDePostre` y el chef trabaja con la abstracción; las extensiones (PastelDeFresas, SouffleChocolate) se agregan sin modificar al chef.',
+    highlights: [
+      'El chef solo depende de la interfaz `PreparacionDePostre`. ',
+      'Nuevos postres se agregan creando nuevas clases, sin tocar al chef.',
+      'OCP se cumple porque el módulo está cerrado a modificaciones pero abierto a extensiones.',
+    ],
+    script: 'OpenClose/Python_Patron/ocp_correcto.py',
+    commands: ['python "OpenClose/Python_Patron/ocp_correcto.py"'],
+    snippet: `class PreparacionDePostre(ABC):
+    @abstractmethod
+    def tiempo_coccion(self):
+        pass
+
+    @abstractmethod
+    def ingredientes(self):
+        pass
+
+    @abstractmethod
+    def presentar(self):
+        pass
+
+
+class ChefRepostero:
+    def preparar(self, receta: PreparacionDePostre):
+        print("⏱️ Tiempo de cocción:", receta.tiempo_coccion())
+        print("🧾 Ingredientes:", receta.ingredientes())
+        print("🍰 Presentación:", receta.presentar())
+`,
+  },
+  {
+    id: 'ocp-anti',
+    label: 'Anti-Patrón',
+    title: 'Chef rígido',
+    subtitle: 'Condicionales por tipo concreto',
+    description:
+      'El chef inspecciona tipos concretos (`PastelFresa`, `SouffleChocolate`) con condicionales; cada nuevo postre exige tocar el mismo método, rompiendo OCP.',
+    highlights: [
+      'El flujo de preparación se basa en `isinstance`, no en abstracciones.',
+      'Para añadir un nuevo postre hay que modificar el método `preparar` del chef.',
+      'La clase se modifica frecuentemente; no está abierta a extensiones.',
+    ],
+    script: 'OpenClose/Ejemplo_AntiPatron/ocp_antipatron.py',
+    commands: ['python "OpenClose/Ejemplo_AntiPatron/ocp_antipatron.py"'],
+    snippet: `class ChefRepostero:
+    def preparar(self, receta):
+        if isinstance(receta, PastelFresa):
+            print("Preparando pastel de fresa...")
+        elif isinstance(receta, SouffleChocolate):
+            print("Preparando soufflé de chocolate...")
+        else:
+            print("Postre no soportado")
+
+
+class PastelFresa(PreparacionDePostre):
+    pass
+
+class SouffleChocolate(PreparacionDePostre):
+    pass
+`,
+  },
+  {
+    id: 'ocp-sin',
+    label: 'Sin Patrón',
+    title: 'Funciones específicas',
+    subtitle: 'Chef con métodos específicos por postre',
+    description:
+      'El chef implementa métodos concretos por cada postre y un único método `preparar` que usa condicionales o cadenas; todo está cerrado a extensiones sin tocar la clase.',
+    highlights: [
+      'Se añaden métodos nuevos al chef cada vez que llega un nuevo tipo de postre.',
+      'La lógica de negocio se mezcla con la selección de recetas.',
+      'El módulo no se puede extender sin modificación; OCP no se cumple.',
+    ],
+    script: 'OpenClose/Ejemplo_SinPatron/ocp_sin_patron.py',
+    commands: ['python "OpenClose/Ejemplo_SinPatron/ocp_sin_patron.py"'],
+    snippet: `class ChefRepostero:
+    def preparar_pastel_fresas(self):
+        print("Preparando pastel de fresas con ingredientes fijos...")
+
+    def preparar_souffle_chocolate(self):
+        print("Preparando soufflé de chocolate con ingredientes fijos...")
+
+    def preparar(self, tipo_postre):
+        if tipo_postre == "fresas":
+            self.preparar_pastel_fresas()
+        elif tipo_postre == "souffle":
+            self.preparar_souffle_chocolate()
+`,
+  },
+]
+
 const srpScenarios = [
   {
     id: 'srp-pattern',
@@ -327,6 +424,7 @@ const ExamplesPanel = ({ principle }) => {
   const [activeScenarioIndex, setActiveScenarioIndex] = useState(0)
   const [activeSrpScenarioIndex, setActiveSrpScenarioIndex] = useState(0)
   const [activeDipScenarioIndex, setActiveDipScenarioIndex] = useState(0)
+  const [activeOcpScenarioIndex, setActiveOcpScenarioIndex] = useState(0)
 
   useEffect(() => {
     if (!principle) return
@@ -335,6 +433,8 @@ const ExamplesPanel = ({ principle }) => {
       setActiveScenarioIndex(0)
     } else if (principle.short === 'SRP') {
       setActiveSrpScenarioIndex(0)
+    } else if (principle.short === 'OCP') {
+      setActiveOcpScenarioIndex(0)
     } else if (principle.short === 'DIP') {
       setActiveDipScenarioIndex(0)
     }
@@ -448,6 +548,88 @@ const ExamplesPanel = ({ principle }) => {
                   className={`px-3 py-2 text-sm font-semibold rounded-full border transition ${
                     idx === activeDipScenarioIndex
                       ? 'border-amber-600 bg-amber-50 text-amber-700'
+                      : 'border-slate-200 bg-slate-100 text-slate-600'
+                  }`}
+                >
+                  {scenario.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="border border-slate-300 rounded-lg bg-slate-900 p-4 min-h-64">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex space-x-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full" />
+                <div className="w-3 h-3 bg-yellow-500 rounded-full" />
+                <div className="w-3 h-3 bg-green-500 rounded-full" />
+              </div>
+              <span className="text-slate-400 text-sm">example.py</span>
+            </div>
+            <div className="text-slate-300 text-sm font-mono leading-relaxed whitespace-pre-wrap">
+              {activeScenario.snippet}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm font-semibold text-gray-900">{activeScenario.title}</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500">{activeScenario.subtitle}</p>
+            </div>
+            <p className="text-gray-700">{activeScenario.description}</p>
+            <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+              {activeScenario.highlights.map((highlight) => (
+                <li key={highlight}>{highlight}</li>
+              ))}
+            </ul>
+
+            <div className="pt-4 border-t border-slate-200">
+              <div className="text-xs uppercase tracking-wide text-slate-500 mb-1">Script</div>
+              <div className="bg-slate-900 text-xs text-emerald-300 font-mono px-3 py-1 rounded">
+                {activeScenario.script}
+              </div>
+              <div className="text-xs uppercase tracking-wide text-slate-500 mt-3 mb-1">
+                Cómo ejecutarlo
+              </div>
+              <div className="bg-slate-800 px-3 py-2 rounded space-y-1">
+                {activeScenario.commands.map((command) => (
+                  <div key={command} className="text-emerald-300 font-mono text-xs">
+                    {command}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (principle.short === 'OCP') {
+    const activeScenario = ocpScenarios[activeOcpScenarioIndex]
+
+    return (
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-fuchsia-600">
+          <h2 className="text-xl font-semibold text-white flex items-center space-x-2">
+            <Code className="h-5 w-5" />
+            <span>Ejemplos de Implementación</span>
+          </h2>
+        </div>
+
+        <div className="p-6 space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Línea de fuego OCP</h3>
+            <p className="text-gray-600 mb-3">Repasa los scripts en <code>OpenClose</code> que ilustran cada caso.</p>
+            <div className="flex flex-wrap gap-2">
+              {ocpScenarios.map((scenario, idx) => (
+                <button
+                  key={scenario.id}
+                  type="button"
+                  onClick={() => setActiveOcpScenarioIndex(idx)}
+                  className={`px-3 py-2 text-sm font-semibold rounded-full border transition ${
+                    idx === activeOcpScenarioIndex
+                      ? 'border-fuchsia-600 bg-fuchsia-50 text-fuchsia-700'
                       : 'border-slate-200 bg-slate-100 text-slate-600'
                   }`}
                 >
