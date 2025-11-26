@@ -5,6 +5,8 @@ import QuickReference from './components/QuickReference'
 import PrincipleDetail from './components/PrincipleDetail'
 import ExamplesPanel from './components/ExamplesPanel'
 import BenefitsSection from './components/BenefitsSection'
+import TestingLevelsSection from './components/TestingLevelsSection'
+import TestingLevelsSidebarCard from './components/TestingLevelsSidebarCard'
 import { principles } from './data/principles'
 
 const App = () => {
@@ -31,13 +33,14 @@ const App = () => {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-6">
             <PrincipleSidebar
               principles={principles}
               activeIndex={activeIndex}
               onSelect={setActiveIndex}
             />
             <QuickReference />
+            <TestingLevelsSidebarCard />
           </div>
 
           <div className="lg:col-span-2 space-y-8">
@@ -47,6 +50,11 @@ const App = () => {
           </div>
         </div>
       </main>
+      <section id="niveles-de-prueba" className="bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <TestingLevelsSection />
+        </div>
+      </section>
     </div>
   )
 }
