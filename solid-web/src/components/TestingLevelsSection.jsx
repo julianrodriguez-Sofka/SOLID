@@ -76,6 +76,34 @@ const testingLevels = [
     ],
   },
   {
+    id: 'system-integration',
+    title: 'Pruebas de Integración del Sistema',
+    summary:
+      'Confirman que el sistema completo coopera correctamente con otros sistemas, infraestructuras o servicios según los criterios ISTQB.',
+    details: [
+      {
+        label: 'Enfoque',
+        text: 'Evaluar las interfaces, protocolos y contratos que permiten que el sistema interactúe con entornos externos y plataformas hermanas.',
+      },
+      {
+        label: 'Objetivo',
+        text: 'Detectar rupturas en flujos transaccionales, sincronización de datos o comunicaciones con sistemas legado antes de que lleguen a producción.',
+      },
+      {
+        label: 'Ejecutor',
+        text: 'Equipos de QA junto a arquitectos e ingenieros de infraestructura que supervisan mallas de integración complejas.',
+      },
+      {
+        label: 'Alcance',
+        text: 'Incluye intercambios de datos externos, conectividad con APIs, mensajería, middleware y dependencias de terceros.',
+      },
+      {
+        label: 'Valor',
+        text: 'Reduce riesgos en despliegues multi-sistema y asegura la fiabilidad de las integraciones críticas.',
+      },
+    ],
+  },
+  {
     id: 'acceptance',
     title: 'Pruebas de Aceptación',
     summary:
@@ -109,7 +137,36 @@ const analogySteps = [
   'Unidad: cada tuerca, sensor y pieza se revisa individualmente.',
   'Integración: se verifica que motor, transmisión y frenos hablen entre sí.',
   'Sistema: el automóvil completo se prueba en pista, midiendo desempeño y seguridad.',
+  'Integración del sistema: se confirma que el coche se comunica con centros de control, servicios en la nube y otras máquinas.',
   'Aceptación: un cliente lo conduce para confirmar que cumple sus necesidades reales.',
+]
+
+const pyramidLevels = [
+  {
+    label: 'Pruebas Unitarias',
+    description: 'Base que se automatiza con frecuencia para validar cada unidad o clase.',
+    width: 'w-full',
+  },
+  {
+    label: 'Pruebas de Integración de Componentes',
+    description: 'Verifica módulos combinados para garantizar que colaboran correctamente.',
+    width: 'w-5/6',
+  },
+  {
+    label: 'Pruebas del Sistema',
+    description: 'Evalúa el comportamiento completo del sistema en un entorno realista.',
+    width: 'w-2/3',
+  },
+  {
+    label: 'Pruebas de Integración del Sistema',
+    description: 'Comprueba interoperabilidad con otros sistemas y servicios externos.',
+    width: 'w-1/2',
+  },
+  {
+    label: 'Pruebas de Aceptación',
+    description: 'Validación final con usuarios para confirmar el valor de negocio.',
+    width: 'w-1/3',
+  },
 ]
 
 const TestingLevelsSection = () => {
@@ -121,11 +178,12 @@ const TestingLevelsSection = () => {
         <p className="text-gray-600">
           Los niveles de pruebas de software agrupan las fases del ciclo de vida (SDLC) según ISTQB, con el objetivo
           de hacer las pruebas más eficientes, organizadas y enfocadas en riesgos específicos de cada componente o
-          sistema.
+          sistema. Los cinco niveles considerados son: Pruebas Unitarias, Integración de Componentes, Sistema,
+          Integración del Sistema y Aceptación.
         </p>
         <p className="text-gray-600">
           Cada nivel puede ejecutar tanto pruebas funcionales como no funcionales, manteniendo la trazabilidad y la
-          capacidad de localizar escenarios en etapas concretas.
+          capacidad de localizar escenarios en etapas concretas, incluida la colaboración del sistema con otros entornos.
         </p>
       </div>
 
@@ -155,14 +213,37 @@ const TestingLevelsSection = () => {
       <div className="bg-blue-50/60 border border-blue-100 rounded-2xl p-5 space-y-2">
         <h4 className="text-lg font-semibold text-blue-900">Secuencia e importancia</h4>
         <p className="text-sm text-blue-900">
-          El orden sugerido es: Pruebas Unitarias, Integración, Sistema y Aceptación. Cada nivel fortalece el
-          anterior y permite detectar defectos cuando son más fáciles (y baratos) de corregir. Todos los niveles se
-          deben completar antes del lanzamiento para evitar sorpresas en producción.
+          El orden sugerido es: Pruebas Unitarias, Integración de Componentes, Sistema, Integración del Sistema y
+          Aceptación. Cada nivel fortalece al anterior y permite detectar defectos cuando son más fáciles (y baratos)
+          de corregir. Todos los niveles se deben completar antes del lanzamiento para evitar sorpresas en producción.
         </p>
         <p className="text-sm text-blue-900">
           Una vigilancia constante y una aproximación sistemática ayudan a cubrir la mayor cantidad de escenarios
           posibles dentro de cada etapa.
         </p>
+      </div>
+
+      <div className="bg-gradient-to-br from-slate-100 via-white to-slate-100 border border-slate-200 rounded-2xl p-5 space-y-3">
+        <h4 className="text-lg font-semibold text-gray-900">Pirámide de niveles de prueba según ISTQB</h4>
+        <p className="text-sm text-gray-600">
+          La pirámide muestra un equilibrio saludable: muchas pruebas en la base (que está en la parte inferior, con pruebas
+          unitarias) y una reducción gradual hacia la cúspide (aceptación), manteniendo siempre la integración del sistema
+          para garantizar interoperabilidad.
+        </p>
+        <div className="space-y-2">
+          {[...pyramidLevels].reverse().map((level) => (
+            <div
+              key={level.label}
+              className={`mx-auto ${level.width} rounded-2xl bg-blue-50 border border-blue-100 px-4 py-2 shadow-sm`}
+            >
+              <div className="flex items-center justify-between text-sm text-blue-900">
+                <span className="font-semibold">{level.label}</span>
+                <span className="text-xs font-medium uppercase tracking-wide text-blue-500">ISTQB</span>
+              </div>
+              <p className="text-[0.75rem] text-blue-700 mt-1">{level.description}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="bg-slate-100 border border-slate-200 rounded-2xl p-5 space-y-2">
