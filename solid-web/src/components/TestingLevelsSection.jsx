@@ -43,7 +43,7 @@ const testingLevels = [
       },
       {
         label: 'Ejecutor',
-        text: 'Usualmente testers y, en ocasiones, desarrolladores expertos en integración.',
+        text: 'Desarrolladores de Sofware expertos en la integración de componentes.',
       },
       {
         label: 'Detalles',
@@ -91,7 +91,7 @@ const testingLevels = [
       },
       {
         label: 'Ejecutor',
-        text: 'Equipos de QA junto a arquitectos e ingenieros de infraestructura que supervisan mallas de integración complejas.',
+        text: 'Testers especializados en la integración de sistemas.',
       },
       {
         label: 'Alcance',
